@@ -1,0 +1,12 @@
+--- a/libwget/net.c
++++ b/libwget/net.c
+@@ -606,7 +606,8 @@
+ 
+ static void _set_async(int fd)
+ {
+-#if ((defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__)
++#if ((defined _WIN32 || defined __WIN32__) && !defined __CYGWIN__) || defined GFWGET_AMIGA
++	/* GFOS: libnix's socket layer takes FIONBIO (IoctlSocket) */
+ 	unsigned long blocking = 0;
+ 
+ 	if (ioctl(fd, FIONBIO, &blocking))
