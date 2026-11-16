@@ -1,0 +1,16 @@
+# What this port builds on: fetched at build time, never shipped.
+# GNU Wget2 (GPL-3.0-or-later; libwget LGPL-3.0-or-later) 2.3.0, the release tarball
+WGET2_URL=https://ftp.gnu.org/gnu/wget/wget2-2.3.0.tar.gz
+WGET2_SHA256=4f1915b2a55a789a15f2f9ada7cc44bca81418e648f76fd88a7f4dd028b2149f
+WGET2_VERSION=2.3.0
+# Our own pieces, fetched at these commits
+# GFOpenRegex main 6c6b695: regex.library and its link stub, libregex.a
+RX_REPO=https://github.com/DalsinAI/gfopenregex
+RX_COMMIT=6c6b695123a16c2c464d4b7c0185b1cb056bdb78
+# GFOpenTLS main 28b5bf5: gfopentls.library's headers (HTTPS); the PC tests
+# build its host libraries from the same commit
+OT_REPO=https://github.com/DalsinAI/gfopentls
+OT_COMMIT=28b5bf5955bdde4805e60d8f07f8bf2d8c4c5352
+# fpuauto (common/fpuauto): the FPU when there is one
+FPA_REPO=${FPA_REPO:-https://github.com/DalsinAI/amicradle-guest}
+FPA_COMMIT=4a784c84b878fe0e9abade7006e67e1ded9b165c

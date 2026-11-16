@@ -1,0 +1,36 @@
+--- a/src/options.c
++++ b/src/options.c
+@@ -3044,7 +3044,11 @@
+ 
+ 	if (!home) {
+ 		if ((home = wget_strnglob("~", 1, GLOB_TILDE_CHECK)) == NULL)
++#ifdef GFWGET_AMIGA
++			home = wget_strdup(GFWGET_HOME); // no $HOME: Wget2's own folder in ENVARC:
++#else
+ 			home = wget_strdup("."); // Use the current directory as 'home' directory
++#endif
+ 	}
+ 
+ 	return home;
+@@ -3263,8 +3267,8 @@
+ 	if (data_home)
+ 		return data_home;
+ 
+-#ifdef _WIN32
+-	if ((env = getenv("LOCALAPPDATA")) && *env)
++#if defined _WIN32 || defined GFWGET_AMIGA
++	if ((env = getenv(GFWGET_APPDATA)) && *env)
+ 		data_home = wget_aprintf("%s/wget", env);
+ 	else
+ 		data_home = wget_strdup(user_home);
+@@ -3296,8 +3300,8 @@
+ 	if (home_dir)
+ 		return home_dir;
+ 
+-#ifdef _WIN32
+-	if ((env = getenv("LOCALAPPDATA")) && *env)
++#if defined _WIN32 || defined GFWGET_AMIGA
++	if ((env = getenv(GFWGET_APPDATA)) && *env)
+ 		home_dir = wget_aprintf("%s/wget", env);
+ 	else
+ 		home_dir = wget_strdup(user_home);
