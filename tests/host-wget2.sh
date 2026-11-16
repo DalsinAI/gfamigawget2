@@ -52,7 +52,8 @@ fi
 BLD="$WORK/bpc"
 # shellcheck disable=SC2086
 GFOS=0 wget2_config "$SRC" "$BLD" CC="$CC" CFLAGS="-O2" $WGET2_CONFIGURE
-CF="-O2 -DHAVE_CONFIG_H -DSYSCONFDIR=\\\"/nonexistent/\\\" -DLOCALEDIR=\\\"/nonexistent\\\" -DGFWGET_HOST_TEST -Wno-cpp"
+CF="-O2 -DHAVE_CONFIG_H -DSYSCONFDIR=\\\"/nonexistent/\\\" -DLOCALEDIR=\\\"/nonexistent\\\" -DGFWGET_HOST_TEST -Wno-cpp \
+ -Werror=implicit-function-declaration -Werror=incompatible-pointer-types -Werror=int-conversion"
 O="$WORK/obj"
 [ "$(cat "$O/.src" 2>/dev/null)" = "$(cat "$SRC/.patched")" ] || { rm -rf "$O"; mkdir -p "$O"; cat "$SRC/.patched" > "$O/.src"; }
 WGET2_OURS="gfwget_compat" wget2_makefile "$O" "$SRC" "$BLD"

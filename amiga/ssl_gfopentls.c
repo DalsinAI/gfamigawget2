@@ -411,7 +411,11 @@ int wget_ssl_open(wget_tcp *tcp)
 		xfree(t);
 		return WGET_E_MEMORY;
 	}
-	t->hook.h_Entry = (ULONG (*)()) tls_hook;
+#ifdef __amigaos__
+	t->hook.h_Entry = (HOOKFUNC) (void (*)(void)) tls_hook;   /* registers a0/a2/a1 */
+#else
+	t->hook.h_Entry = tls_hook;
+#endif
 	t->hook.h_Data = t;
 	OT_SetIOHook(t->conn, &t->hook);
 
