@@ -40,7 +40,7 @@ if [ -z "${OT_SRC:-}" ]; then fetch_at "$WORK/deps/gfopentls" "$OT_REPO" "$OT_CO
 
 # --- the PC tests first: the same sources and settings ------------------------
 if [ "${HOST_TESTS:-1}" != 0 ] && command -v "${HOST_CC:-cc}" > /dev/null 2>&1; then
-    WORK="$WORK/host" OT_SRC="$OT_SRC" sh "$HERE/tests/host-wget2.sh" "$SRC" > "$WORK/host-tests.log" 2>&1 || { grep -E "passed|FAIL|^  " "$WORK/host-tests.log" | tail -40; exit 1; }
+    WORK="$WORK/host" OT_SRC="$OT_SRC" sh "$HERE/tests/host-wget2.sh" "$SRC" > "$WORK/host-tests.log" 2>&1 || { tail -40 "$WORK/host-tests.log"; exit 1; }
     grep -E "all checks passed" "$WORK/host-tests.log"
 fi
 
