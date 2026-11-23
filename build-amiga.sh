@@ -5,7 +5,7 @@
 # HTTPS through GFOpenTLS (gfopentls.library, amiga/ssl_gfopentls.c), and
 # regular expressions (--accept-regex, --reject-regex) through GFOpenRegex
 # (regex.library).
-#   STOVE=.../stoves/os32-gcc16-open6 OUT=out ./build-amiga.sh
+#   STOVE=.../stoves/os32-gcc16-open9 OUT=out ./build-amiga.sh
 # Wget2, GFOpenRegex, GFOpenTLS's headers and fpuauto are fetched as
 # wget2.lock gives; nothing third-party is kept here. WGET2_SRC=... takes a
 # Wget2 tree already on disk. The PC tests (tests/host-wget2.sh: the same
@@ -23,12 +23,13 @@ set -eu
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 . "$HERE/wget2.lock"
 . "$HERE/scripts/wget2-common.sh"
-STOVE=${STOVE:-"$HOME/AmiCradle/stoves/os32-gcc16-open6"}
+STOVE=${STOVE:-"$HOME/AmiCradle/stoves/os32-gcc16-open9"}
 # outside the checkout: Cradle cleans it (git clean -ffdx) before every job
 WORK="${WORK:-$HOME/.cache/gfamigawget2/build}"; OUT="${OUT:-$WORK/out}"; JOBS=${JOBS:-8}
 TC="$STOVE/prefix"; PATH="$TC/bin:$PATH"; export PATH
 mkdir -p "$WORK/deps" "$OUT"; OUT=$(cd "$OUT" && pwd); WORK=$(cd "$WORK" && pwd)
 NDK=""; [ -z "${NDK_INCLUDE:-}" ] || NDK="-idirafter $(cd "$NDK_INCLUDE" && pwd)"
+echo "Compiler: $(m68k-amigaos-gcc --version | head -n 1) ($(basename "$STOVE"))"
 t0=$(date +%s)
 
 # --- Wget2 at its release, with patches/ ------------------------------------
@@ -74,10 +75,14 @@ if [ ! -f "$FAL/libfpuauto.a" ] || [ "$(cat "$FAL/.rev" 2>/dev/null)" != "$FPA_C
 fi
 
 # --- configure's answers for the Amiga ------------------------------------------
+# C23 for configure and the compile alike: Wget2's gnulib files take alignof, bool and the like as C23 gives
+# them, and a stove whose GCC starts in an older C (open9) would otherwise answer configure in one and compile
+# in the other
+STD=-std=gnu23
 BLD="$WORK/b68k"
 # shellcheck disable=SC2086
 GFOS=1 wget2_config "$SRC" "$BLD" --host=m68k-amigaos --build="$(sh "$SRC/build-aux/config.guess")" \
-    CC="m68k-amigaos-gcc -noixemul -m68040" CFLAGS="-O2 $NDK" LIBS="-lsocket" $WGET2_CONFIGURE
+    CC="m68k-amigaos-gcc -noixemul -m68040 $STD" CFLAGS="-O2 $NDK" LIBS="-lsocket" $WGET2_CONFIGURE
 echo "configure: $(grep -c '^#define HAVE_' "$BLD/gf/config.h") answers"
 
 # --- compile -------------------------------------------------------------------
@@ -85,7 +90,7 @@ LATE=""
 if m68k-amigaos-gcc -fno-late-combine-instructions -S -o /dev/null -x c /dev/null 2>/dev/null; then LATE="-fno-late-combine-instructions"; fi
 # no loops turned into memset/memcpy calls (GCC 16), address 0 is memory
 CC=m68k-amigaos-gcc
-CF="-noixemul -m68040 -O2 -fno-tree-loop-distribute-patterns -fno-delete-null-pointer-checks $LATE $NDK \
+CF="-noixemul -m68040 $STD -O2 -fno-tree-loop-distribute-patterns -fno-delete-null-pointer-checks $LATE $NDK \
  -Werror=implicit-function-declaration -Werror=int-conversion -Wno-cpp \
  -DHAVE_CONFIG_H -DSYSCONFDIR=\\\"ENVARC:Wget2/\\\" -DLOCALEDIR=\\\"LOCALE:\\\" \
  -DGFINET_NEED_SOCKADDR_STORAGE -DGFINET_SIN_LEN -I$RXB/include -DGFWGET_DATE=\\\"$(date -u +%d.%m.%Y)\\\""
@@ -105,7 +110,7 @@ $LINK -o "$O/wget2.debug" $(cd "$O" && for f in $(sed -n 's/^OBJS =//p' Makefile
 P="$OUT/Parts/wget2"; rm -rf "$P"; mkdir -p "$P/C" "$P/Libs" "$P/Docs/Wget2"
 m68k-amigaos-strip -o "$P/C/wget2" "$O/wget2.debug"
 cp "$RXB/lib/regex.library" "$P/Libs/regex.library"
-cp "$HERE/README.md" "$P/Docs/Wget2/ReadMe"
+cp "$HERE/docs/PORT.md" "$P/Docs/Wget2/ReadMe"
 cp "$SRC/COPYING" "$P/Docs/Wget2/COPYING-Wget2"
 [ ! -f "$SRC/docs/wget2.md" ] || cp "$SRC/docs/wget2.md" "$P/Docs/Wget2/wget2.md"
 cp "$RX_SRC/LICENSE" "$P/Docs/Wget2/LICENSE-GFOpenRegex"
