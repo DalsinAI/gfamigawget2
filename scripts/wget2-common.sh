@@ -89,6 +89,10 @@ wget2_config() {
 
 /* GFOS: what libnix lacks, our own (amiga/gfwget_compat.h) */
 #define GFWGET_AMIGA 1
+/* gnulib's md5/sha files take alignof as C23 has it; before C23 it is _Alignof (C11) */
+#if !defined alignof && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 202311L)
+# define alignof _Alignof
+#endif
 #include "gfwget_compat.h"
 EOF
     else
