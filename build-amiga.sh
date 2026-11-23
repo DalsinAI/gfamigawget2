@@ -23,6 +23,7 @@ set -eu
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 . "$HERE/wget2.lock"
 . "$HERE/scripts/wget2-common.sh"
+. "$HERE/scripts/git-mirror.sh"
 STOVE=${STOVE:-"$HOME/AmiCradle/stoves/os32-gcc16-open9"}
 # outside the checkout: Cradle cleans it (git clean -ffdx) before every job
 WORK="${WORK:-$HOME/.cache/gfamigawget2/build}"; OUT="${OUT:-$WORK/out}"; JOBS=${JOBS:-8}
