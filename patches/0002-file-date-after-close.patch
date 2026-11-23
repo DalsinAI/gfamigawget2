@@ -1,0 +1,13 @@
+--- a/src/wget.c
++++ b/src/wget.c
+@@ -4556,6 +4556,10 @@
+ 		}
+ 
+ 		close(context->outfd);
++#ifdef GFWGET_AMIGA
++		/* AmigaDOS dates a written file when it is closed: the server's date goes on now */
++		gfwget_closed(context->outfd);
++#endif
+ 		context->outfd = -1;
+ 	}
+ 
