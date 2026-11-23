@@ -45,7 +45,7 @@ WGET2_CONFIGURE="--disable-threads --disable-nls --disable-doc --disable-shared
 # checkout of tag v$WGET2_VERSION) where the tarball cannot be fetched.
 wget2_source() {
     PSUM=$(cat "$HERE"/patches/*.patch | sha256sum | cut -c1-16)
-    want="$WGET2_VERSION-${WGET2_SRC:+local-}$PSUM"
+    want="$WGET2_VERSION-${WGET2_SRC:+local-}$PSUM-a1"
     if [ "$(cat "$1/.patched" 2>/dev/null)" != "$want" ]; then
         rm -rf "$1"; mkdir -p "$1"
         if [ -n "${WGET2_SRC:-}" ]; then
@@ -61,6 +61,11 @@ wget2_source() {
         [ -x "$1/configure" ] || { echo "$1: no configure (bootstrap the git checkout first)"; exit 1; }
         for p in "$HERE"/patches/*.patch; do
             patch -s -d "$1" -p1 < "$p" || { echo "patch failed: $p"; exit 1; }
+        done
+        # gnulib's md5/sha files write alignof, C23's keyword; on the open9 stove it reaches them as a plain
+        # name, so they get C11's _Alignof, which every C since has (the "-a1" in the stamp above)
+        for f in $(grep -l 'alignof (' "$1"/lib/*.c 2>/dev/null); do
+            sed -i 's/\([^_A-Za-z0-9]\)alignof (/\1_Alignof (/g' "$f"
         done
         echo "$want" > "$1/.patched"
     fi
@@ -89,10 +94,6 @@ wget2_config() {
 
 /* GFOS: what libnix lacks, our own (amiga/gfwget_compat.h) */
 #define GFWGET_AMIGA 1
-/* gnulib's md5/sha files take alignof as C23 has it; before C23 it is _Alignof (C11) */
-#if !defined alignof && (!defined __STDC_VERSION__ || __STDC_VERSION__ < 202311L)
-# define alignof _Alignof
-#endif
 #include "gfwget_compat.h"
 EOF
     else
