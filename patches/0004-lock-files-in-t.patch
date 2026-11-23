@@ -1,0 +1,26 @@
+--- a/libwget/io.c
++++ b/libwget/io.c
+@@ -413,10 +413,22 @@
+ 	// find out system temp directory
+ 	if (!(tmpdir = getenv("TMPDIR")) && !(tmpdir = getenv("TMP"))
+ 		&& !(tmpdir = getenv("TEMP")) && !(tmpdir = getenv("TEMPDIR")))
++#ifdef GFWGET_AMIGA
++		tmpdir = "T:"; // AmigaDOS's drawer for temporary files
++#else
+ 		tmpdir = "/tmp";
++#endif
+ 
+ 	// create a per-usr tmp file name
+-#ifdef HAVE_GETUID
++#ifdef GFWGET_AMIGA
++	// AmigaDOS: a name follows a device ("T:") with nothing between; "T:/" is T:'s parent
++	if (*tmpdir && tmpdir[strlen(tmpdir) - 1] == ':')
++		lockfile = wget_aprintf("%s%s_lck", tmpdir, basename);
++	else if (*tmpdir)
++		lockfile = wget_aprintf("%s/%s_lck", tmpdir, basename);
++	else
++		lockfile = wget_aprintf("%s_lck", basename);
++#elif defined HAVE_GETUID
+ 	if (*tmpdir)
+ 		lockfile = wget_aprintf("%s/%s_lck_%u", tmpdir, basename, (unsigned) getuid());
+ 	else

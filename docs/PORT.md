@@ -109,6 +109,9 @@ AmigaDOS keeps.
   the file (`gfwget_closed()`).
 - `patches/0003`: Wget2's folder is `ENVARC:Wget2` (or `WGET2DIR`, or
   `$HOME`), not `./.config/wget` and `./.local/share/wget`.
+- `patches/0004`: the lock files Wget2 takes while it rewrites its HSTS and
+  HPKP lists go in `T:` (or `TMPDIR`), not `/tmp`, which AmigaDOS does not
+  have.
 - `amiga/ssl_gfopentls.c`: libwget's TLS calls (`wget_ssl_*`) over
   GFOpenTLS, in `ssl_none.c`'s place: an I/O hook over Wget2's own socket,
   Wget2's timeouts, SNI, verification modes, ALPN, sessions per host.
